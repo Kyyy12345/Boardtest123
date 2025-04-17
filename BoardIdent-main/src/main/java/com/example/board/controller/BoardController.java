@@ -39,10 +39,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class BoardController {
 
 	// 윈도우
-	 private static final String UPLOAD_DIR = "C:/upload/";
+	//private static final String UPLOAD_DIR = "C:/upload/";
 
 	// 리눅스
-//	private static final String UPLOAD_DIR = "/opt/tomcat9/upload/";
+	private static final String UPLOAD_DIR = "/opt/tomcat9/upload/";
 
 	@Autowired
 	private EntityManager entityManager;
