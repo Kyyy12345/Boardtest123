@@ -39,10 +39,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class BoardController {
 
 	// 윈도우
-	// private static final String UPLOAD_DIR = "C:/upload/";
+	 private static final String UPLOAD_DIR = "C:/upload/";
 
 	// 리눅스
-	private static final String UPLOAD_DIR = "/opt/tomcat9/upload/";
+//	private static final String UPLOAD_DIR = "/opt/tomcat9/upload/";
 
 	@Autowired
 	private EntityManager entityManager;
@@ -102,11 +102,11 @@ public class BoardController {
 			try {
 				String originalFileName = file.getOriginalFilename();
 				String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-				fileName = UUID.randomUUID().toString() + fileExtension;
+				fileName = UUID.randomUUID().toString() + fileExtension; // 파일 이름을 고유한 이름으로 설정
 				filePath = UPLOAD_DIR + fileName;
 
 				File dest = new File(filePath);
-				file.transferTo(dest);
+				file.transferTo(dest); // 파일을 디렉토리에 저장
 			} catch (IOException e) {
 				e.printStackTrace();
 				return "error";
@@ -203,17 +203,42 @@ public class BoardController {
 	
 	
 
+//	private static void createDirectoryWithPermissions(String dirPath) throws IOException {
+//		Path path = Paths.get(dirPath);
+//		if (Files.notExists(path)) {
+//			Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxr-xr-x");
+//			Files.createDirectory(path, PosixFilePermissions.asFileAttribute(permissions));
+//		}
+//		try {
+//			changeOwnerAndGroup(dirPath, "tomcat", "tomcat");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
 	private static void createDirectoryWithPermissions(String dirPath) throws IOException {
-		Path path = Paths.get(dirPath);
-		if (Files.notExists(path)) {
-			Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxr-xr-x");
-			Files.createDirectory(path, PosixFilePermissions.asFileAttribute(permissions));
-		}
-		try {
-			changeOwnerAndGroup(dirPath, "tomcat", "tomcat");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	    Path path = Paths.get(dirPath);
+	    if (Files.notExists(path)) {
+	        String os = System.getProperty("os.name").toLowerCase();
+	        if (os.contains("win")) {
+	            // Windows 환경에서는 POSIX 권한 없이 디렉토리 생성
+	            Files.createDirectory(path);
+	        } else {
+	            // Linux/Unix 환경에서는 POSIX 권한 설정
+	            Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxr-xr-x");
+	            Files.createDirectory(path, PosixFilePermissions.asFileAttribute(permissions));
+	        }
+	    }
+	    
+	    // 리눅스 환경에서만 소유자 변경 시도
+	    String os = System.getProperty("os.name").toLowerCase();
+	    if (!os.contains("win")) {
+	        try {
+	            changeOwnerAndGroup(dirPath, "tomcat", "tomcat");
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	private static void changeOwnerAndGroup(String dirPath, String owner, String group) throws IOException {
